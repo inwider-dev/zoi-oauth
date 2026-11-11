@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Авторизация Threads</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 28px 18px;
+         max-width: 640px; margin-inline: auto; line-height: 1.5; }
+  h1 { font-size: 1.35rem; margin: 0 0 8px; }
+  p { margin: 0 0 14px; color: #3f3f46; }
+  .code { font-family: ui-monospace, Consolas, monospace; font-size: 1rem; word-break: break-all;
+          background: #f4f4f5; border: 1px solid #d4d4d8; border-radius: 10px; padding: 14px;
+          user-select: all; }
+  button { font-size: 1rem; padding: 12px 18px; border-radius: 10px; border: 0;
+           background: #111; color: #fff; width: 100%; margin-top: 12px; }
+  .err { background: #fdecec; border-color: #f5b5b5; }
+  .hint { font-size: .9rem; color: #52525b; }
+  @media (prefers-color-scheme: dark) {
+    p, .hint { color: #d4d4d8; }
+    .code { background: #1c1c1f; border-color: #3a3a3f; }
+    button { background: #fff; color: #111; }
+    .err { background: #3a1d1d; border-color: #6b3030; }
+  }
+</style>
+</head>
+<body>
+<h1 id="title">Авторизация Threads</h1>
+<p id="msg">Проверяю ответ…</p>
+<div class="code" id="out" hidden></div>
+<button id="copy" hidden>Скопировать и отправить в Telegram</button>
+<p class="hint" id="hint" hidden>Код действует 1 час и срабатывает один раз. Скопируйте его
+и отправьте в чат с Hermes одним сообщением.</p>
+<script>
+  const p = new URLSearchParams(location.search);
+  const code = p.get('code');
+  const err = p.get('error');
+  const out = document.getElementById('out');
+  const btn = document.getElementById('copy');
+  const msg = document.getElementById('msg');
+  if (code) {
+    msg.textContent = 'Всё получилось. Скопируйте код ниже и отправьте его в Telegram:';
+    out.textContent = code.replace(/#_$/, '');
+    out.hidden = false; btn.hidden = false;
+    document.getElementById('hint').hidden = false;
+    btn.onclick = async () => {
+      try { await navigator.clipboard.writeText(out.textContent); btn.textContent = 'Скопировано ✓'; }
+      catch (e) { btn.textContent = 'Выделите код вручную'; }
+    };
+  } else if (err) {
+    document.getElementById('title').textContent = 'Доступ не выдан';
+    msg.textContent = 'Авторизация отменена или отклонена. Код: ' +
+      err + ' (' + (p.get('error_description') || '') + ')';
+    out.classList.add('err');
+    out.textContent = location.search;
+    out.hidden = false;
+  } else {
+    document.getElementById('title').textContent = 'Пустая страница';
+    msg.textContent = 'Здесь нет кода. Откройте ссылку авторизации из Telegram заново.';
+  }
+</script>
+</body>
+</html>
